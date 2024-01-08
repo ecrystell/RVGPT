@@ -1,17 +1,18 @@
 {
-  "name": "PyScript Demo 1",
-  "description": "Build Chrome Extensions in Python/PyScript",
+  "name": "RVGPT shopee review",
+  "description": "shop safely on shopee",
   "version": "1.0",
   "manifest_version": 3,
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
     "48": "icons/icon-48.png",
-    "128": "icons/icon-128.png"
+    "128": "icons/icon-128.png",
+    "512": "icons/shopee.png"
   },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "icons/icon-128.png"
+    "default_icon": "icons/shopee.png"
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
