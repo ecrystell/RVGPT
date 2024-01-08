@@ -56,7 +56,7 @@ def getreviews(url):
                 reviews.append([item, user, userid, ctime, star, comment])
 
 
-        # with open('reviews.csv', 'a') as f:
+        # with open('data/reviews.csv', 'a') as f:
         #     for r in reviews:
         #         f.write("{},{},{},{},{},{}\n".format(r[0], r[1], r[2], r[3], r[4], r[5]))
         print("reviews done")
@@ -66,4 +66,4 @@ def getreviews(url):
         
 
 
-getreviews("https://shopee.sg/Nike-Air-Monarch-IV-4-White-Blue-Silver-Daddy-Shoes-Casual-Retro-Time-Men's-ACS-415445-102-i.184639455.19814568437?sp_atk=74a0bddd-967c-43d9-86c1-c83b5d9906cb&xptdk=74a0bddd-967c-43d9-86c1-c83b5d9906cb")
+#getreviews("https://shopee.sg/Nike-Air-Monarch-IV-4-White-Blue-Silver-Daddy-Shoes-Casual-Retro-Time-Men's-ACS-415445-102-i.184639455.19814568437?sp_atk=74a0bddd-967c-43d9-86c1-c83b5d9906cb&xptdk=74a0bddd-967c-43d9-86c1-c83b5d9906cb")
