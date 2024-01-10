@@ -3,6 +3,7 @@ import re
 import json
 import requests
 
+# function to remove emojis from text as python cannot decode
 def remove_emojis(data):
     emoj = re.compile("["
         u"\U00002700-\U000027BF"  # Dingbats
@@ -20,6 +21,7 @@ def remove_emojis(data):
 
 def getreviews(url):
 
+    # request from shopee api for reviews
     r = re.search(r'i\.(\d+)\.(\d+)', url)
     shop_id, item_id = r[1], r[2]
     ratings_url = 'https://shopee.sg/api/v2/item/get_ratings?filter=0&flag=1&itemid={item_id}&limit=1&offset=0&shopid={shop_id}&type=0'
@@ -28,9 +30,10 @@ def getreviews(url):
     testing = requests.get(ratings_url.format(shop_id=shop_id, item_id=item_id)).json()
     reallimit = testing['data']['item_rating_summary']["rating_count"][4]
 
+    # check whether there are any reviews
     print(reallimit)
     while reallimit > 0:
-        if reallimit > 59:
+        if reallimit > 59: # max number of reviews accessible at once is 59
             limit = 59
             reallimit -= 59
         else:

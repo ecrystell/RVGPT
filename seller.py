@@ -8,7 +8,6 @@ from reviews import remove_emojis
 def getsellerdata(url):
 
 
-
     proxy = "http://3749742d425110b8cee122d8ef42463a4024e7e0:js_render=true&wait_for=img&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
     proxies = {"http": proxy, "https": proxy}
     response = requests.get(url, proxies=proxies, verify=False)
@@ -66,7 +65,6 @@ def getsellerdata(url):
     with open("data/seller.csv", 'a') as f:
         f.write(towrite[:-1] + '\n')
             
-
     return item
 
 #getsellerdata("https://shopee.sg/nendohitch?categoryId=100012&entryPoint=ShopByPDP&itemId=12112315748")
