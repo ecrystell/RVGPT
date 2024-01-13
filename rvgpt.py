@@ -81,7 +81,7 @@ def getreviews(url):
 
 def getsellerdata(url): 
 
-    proxy = "http://eb8d805b205dd8b814081bbb07ae647428ea5d9c:js_render=true&wait_for=img&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
+    proxy = "http://d750d7b5f2848b21db9e4483882238c6295e5485:js_render=true&wait_for=img&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
     proxies = {"http": proxy, "https": proxy}
     response = requests.get(url, proxies=proxies, verify=False)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -178,7 +178,7 @@ def compare_pdts(name): # Takes in argument of product name
 def scrapesite(url, fromUser): 
 
     # scraping url using proxy
-    proxy = "http://eb8d805b205dd8b814081bbb07ae647428ea5d9c:js_render=true&wait_for=.shopee-searchbar&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
+    proxy = "http://d750d7b5f2848b21db9e4483882238c6295e5485:js_render=true&wait_for=.shopee-searchbar&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
     proxies = {"http": proxy, "https": proxy}
     response = requests.get(url, proxies=proxies, verify=False)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -234,18 +234,67 @@ def pretrain(filename):
   from nltk.tokenize import RegexpTokenizer
   from collections import OrderedDict
 
-  from torch import nn
-  from transformers import Trainer
-
-  import joblib
-
   import nltk
   from sklearn.feature_extraction.text import TfidfVectorizer
   from sklearn.linear_model import LogisticRegression,SGDClassifier
   from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, recall_score, precision_score, f1_score, pairwise_distances
   from sklearn.model_selection import train_test_split
 
-#   df = pd.read_csv("false_data.csv") # dataset
+  df = pd.read_csv('false_data.csv') # dataset
+
+  df['comment'] = df.apply(lambda row: str(row['comment']).lower(), axis=1) # lowercase
+  tokenizer = RegexpTokenizer(r'\w+')
+  df['comment'] = df['comment'].apply(lambda x: ' '.join(word for word in tokenizer.tokenize(x))) # remove punctuation but word tokenization
+  df['review_length'] = df['comment'].apply(lambda x: len(x.split())) # review word count
+  df['date'] = pd.to_datetime(df['ctime'],unit='s').dt.date #date column
+  df['time'] = pd.to_datetime(df['ctime'],unit='s').dt.time # time column
+  mnr_df1 = df[['userid', 'date']].copy()
+  mnr_df2 = mnr_df1.groupby(by=['date', 'userid']).size().reset_index(name='mnr')
+  mnr_df2['mnr'] = mnr_df2['mnr'] / mnr_df2['mnr'].max() #finds the number of reviews made in 1 day/number of reviews ever made by this user
+  df = df.merge(mnr_df2, on=['userid', 'date'], how='inner')
+
+  review_data = df
+  res = OrderedDict()
+
+  # Iterate over data and create groups of reviewers
+  for row in review_data.iterrows():
+      if row[1].userid in res:
+          res[row[1].userid].append(row[1].comment) #add comment to existing user
+      else:
+          res[row[1].userid] = [row[1].comment] # new user
+
+  individual_reviewer = [{'userid': k, 'comment': v} for k, v in res.items()]
+  df2 = dict()
+  df2['userid'] = pd.Series([])
+  df2['Maximum Content Similarity'] = pd.Series([])
+  vector = TfidfVectorizer(min_df=0)
+  count = -1
+  for reviewer_data in individual_reviewer:
+      count = count + 1
+      try:
+          tfidf = vector.fit_transform(reviewer_data['comment'])
+      except:
+          pass
+      cosine = 1 - pairwise_distances(tfidf, metric='cosine')
+
+      np.fill_diagonal(cosine, -np.inf)
+      max = cosine.max()
+
+      # To handle reviewier with just 1 review
+      if max == -np.inf:
+          max = 0
+      df2['userid'][count] = reviewer_data['userid']
+      df2['Maximum Content Similarity'][count] = max
+
+  df3 = pd.DataFrame(df2, columns=['userid', 'Maximum Content Similarity'])
+  df = pd.merge(review_data, df3, on="userid", how="left")
+  df.drop(index=np.where(pd.isnull(df))[0], axis=0, inplace=True) #merge df and df3
+
+  df.drop(['itemid', 'userid', 'username', 'ctime', 'rating', 'comment'], axis=1, inplace=True) # remove anything that is not relevant
+
+  X = df[['review_length', 'mnr', 'Maximum Content Similarity']]
+  y = df['fakeornot']
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.5, random_state=42) #dataset training
 
   test = pd.read_csv(filename, encoding='ISO-8859-1')
   test['comment'] = test.apply(lambda row: str(row['comment']).lower(), axis=1)
@@ -302,10 +351,10 @@ def pretrain(filename):
   df3 = pd.DataFrame(df2, columns=['userid', 'Maximum Content Similarity'])
   # left outer join on original datamatrix and cosine dataframe
   test = pd.merge(review_data, df3, on="userid", how="left")
-#   df.drop(index=np.where(pd.isnull(df))[0], axis=0, inplace=True)
+  df.drop(index=np.where(pd.isnull(df))[0], axis=0, inplace=True)
 
-  logreg = joblib.load('pretrained_model.joblib')
-
+  logreg = LogisticRegression(C=3)
+  logreg.fit(X_train, y_train)
   test['fakeornot'] = 'none'
 
   # Assuming you have already trained a logistic regression model named logreg
@@ -332,7 +381,6 @@ def pretrain(filename):
 
   return (fake,original, fake_review)
 
-
 reviews = scrapped[1] 
 ratings = []
 filename = 'data/{}.csv'.format(scrapped[0][0])
@@ -344,6 +392,10 @@ with open (filename, 'w') as f:
         w.writerow(review)
 
 final_review = pretrain(filename)
+# if real: 
+#     ratings.append(review[5])
+
+# final_rating = sum(ratings)/len(ratings)
 
 # # check seller profile/reliability (fraud/no -- qian)
 

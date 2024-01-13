@@ -58,7 +58,7 @@ def compare_pdts(name): # Takes in argument of product name
 def scrapesite(url, fromUser): 
 
     # scraping url using proxy
-    proxy = "http://bb51a0e5851590d27c755b2ff8271f2f5fcea393:js_render=true&wait_for=.shopee-searchbar&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
+    proxy = "http://3749742d425110b8cee122d8ef42463a4024e7e0:js_render=true&wait_for=.shopee-searchbar&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
     proxies = {"http": proxy, "https": proxy}
     response = requests.get(url, proxies=proxies, verify=False)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -97,4 +97,3 @@ def scrapesite(url, fromUser):
     if fromUser: # if scraping the page user is on, activate compare_pdts (to prevent compare_pdts loop)
         compare_pdts(name)
 
-scrapesite('https://shopee.sg/XEXYMIX-XA1131N-Sparky-Crop-Top-Women-T-shirt-Sport-(-10-Colors-)-i.199276028.20445519440?sp_atk=ed075246-1ec5-45b0-913c-7cd027446503&xptdk=ed075246-1ec5-45b0-913c-7cd027446503', True)
