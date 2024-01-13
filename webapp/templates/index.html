@@ -1,18 +1,38 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>RVGPT shopee review</title>
+		<title>RVGPT shopee shield</title>
 		<link rel="stylesheet" href="/static/css/style.css">
 	</head>
 	<body>  
 		<div id="head">
-		  <h2><img src='icons/logo.png' alt="shopee">RVGPT shopee review</h2>
+		  <h2><img src='static/images/logo.png' alt="shopee">RVGPT shopee shield</h2>
 		</div>
 		
 		<div id="content">
-			<p id = 'seller'></p>
-			<p id = 'reviews'></p>
-			<p id = 'compare'></p>
+		
+			{% if seller > 0.7 %}
+			<p id = 'seller' class = 'info' style = 'background-color: green'>
+				This seller is very reliable 
+			</p>
+			{% elif seller > 0.5 %}
+			<p id = 'seller' class = 'info' style = 'background-color: orange'>
+				This seller is likely reliable 
+			</p>
+			{% elif seller > 0.3 %}
+			<p id = 'seller' class = 'info' style = 'background-color: orangered'>
+				This seller is not so reliable 
+			</p>
+			{% else %}
+			<p id = 'seller' class = 'info' style = 'background-color: red'>
+				This seller is very unreliable 
+			</p>
+
+			{% endif %}
+	
+			
+			<p id = 'reviews' class = 'info'>{{reviews}}</p>
+			<p id = 'compare' class = 'info'>Purchase premium to unlock</p>
 		</div>
 	
 	</body>
