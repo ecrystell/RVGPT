@@ -81,7 +81,7 @@ def getreviews(url):
 
 def getsellerdata(url): 
 
-    proxy = "http://eb8d805b205dd8b814081bbb07ae647428ea5d9c:js_render=true&wait_for=img&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
+    proxy = "http://7748d960dd1d5d0a6d83cbd2a1595db91b416e72:js_render=true&wait_for=img&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
     proxies = {"http": proxy, "https": proxy}
     response = requests.get(url, proxies=proxies, verify=False)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -178,7 +178,7 @@ def compare_pdts(name): # Takes in argument of product name
 def scrapesite(url, fromUser): 
 
     # scraping url using proxy
-    proxy = "http://eb8d805b205dd8b814081bbb07ae647428ea5d9c:js_render=true&wait_for=.shopee-searchbar&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
+    proxy = "http://7748d960dd1d5d0a6d83cbd2a1595db91b416e72:js_render=true&wait_for=.shopee-searchbar&premium_proxy=true&proxy_country=sg@proxy.zenrows.com:8001"
     proxies = {"http": proxy, "https": proxy}
     response = requests.get(url, proxies=proxies, verify=False)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -220,9 +220,9 @@ def scrapesite(url, fromUser):
         print("seller " + url)
         return [reviews] # product url 
         
-scrapped = scrapesite(url,True)
+# scrapped = scrapesite(url,True)
 
-print(scrapped)
+# print(scrapped)
     
 # # check for fake reviews -- output actual one (nicholas)
 import csv
@@ -304,7 +304,7 @@ def pretrain(filename):
   test = pd.merge(review_data, df3, on="userid", how="left")
 #   df.drop(index=np.where(pd.isnull(df))[0], axis=0, inplace=True)
 
-  logreg = joblib.load('pretrained_model.joblib')
+  logreg = joblib.load('ineedhelp.joblib')
 
   test['fakeornot'] = 'none'
 
@@ -332,18 +332,6 @@ def pretrain(filename):
 
   return (fake,original, fake_review)
 
-
-reviews = scrapped[1] 
-ratings = []
-filename = 'data/{}.csv'.format(scrapped[0][0])
-with open (filename, 'w') as f: 
-    w = csv.writer(f, delimiter=',')
-    w.writerow(['itemid','username','userid', 'ctime', 'rating','comment','fakeornot', 'confidence level'])
-    for review in reviews: 
-        review.extend([0,0])
-        w.writerow(review)
-
-final_review = pretrain(filename)
 
 # # check seller profile/reliability (fraud/no -- qian)
 
@@ -386,14 +374,12 @@ def clean(seller):
     else:
         seller[5] = 0 
 
-seller = scrapped[0]     
-clean(seller)
-print(seller)
+# seller = scrapped[0]     
+# clean(seller)
+# print(seller)
 
 def seller_fraud(socialNbFollowers, socialNbFollows, productsListed,  daysSinceLastLogin, seniority):
     rf = joblib.load("random_forest.joblib")
     features = np.array([[socialNbFollowers, socialNbFollows, productsListed,  daysSinceLastLogin, seniority]])
     return rf.predict_proba(features)
 
-fradulent  = seller_fraud(seller[1], seller[2], seller[3], seller[4], seller[5])
-print(fradulent, final_review)
